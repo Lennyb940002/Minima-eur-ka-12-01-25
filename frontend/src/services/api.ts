@@ -1,3 +1,4 @@
+//services/api.Ts
 import axios from 'axios';
 import { Sale } from '../components/sales/types';
 

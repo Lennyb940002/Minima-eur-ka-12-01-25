@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trash, Edit, Plus } from 'lucide-react';
 import { Product } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -9,6 +9,16 @@ export function ProductView() {
   const [filters, setFilters] = useState({ category: '', status: '' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    setFilteredProducts(
+      products.filter((product) =>
+        (!filters.category || product.category === filters.category) &&
+        (!filters.status || product.status === filters.status)
+      )
+    );
+  }, [products, filters]);
 
   const handleCreateOrUpdate = (product: Product) => {
     if (productToEdit) {
@@ -17,16 +27,16 @@ export function ProductView() {
       setProducts((prev) => [product, ...prev]);
     }
     setProductToEdit(null);
+    setIsModalOpen(false);
   };
 
   const handleDelete = (id: number) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const filteredProducts = products.filter((product) =>
-    (!filters.category || product.category === filters.category) &&
-    (!filters.status || product.status === filters.status)
-  );
+  const resetFilters = () => {
+    setFilters({ category: '', status: '' });
+  };
 
   return (
     <div className="bg-black text-white min-h-screen">
@@ -62,6 +72,12 @@ export function ProductView() {
             <option className="text-black" value="validated">Validé</option>
             <option className="text-black" value="rejected">Rejeté</option>
           </select>
+          <button
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            onClick={resetFilters}
+          >
+            Reset
+          </button>
         </div>
       </div>
 
@@ -91,7 +107,8 @@ export function ProductView() {
                 </button>
               </div>
             </div>
-            <p className="text-sm text-white/70 mt-2">{product.description}</p>
+            <p className="text-sm text-white/70 mt-2">Note: {product.totalScore}</p>
+            <a href={product.link} className="text-blue-400 hover:underline mt-2 block">{product.link}</a>
             <div className="mt-4 flex justify-between items-center">
               <span className={`px-2 py-1 rounded-full text-xs ${{
                 draft: 'bg-gray-500/20 text-gray-400',
